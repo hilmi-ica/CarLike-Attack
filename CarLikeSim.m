@@ -181,7 +181,7 @@ text(xnoiseArray(1, 1) - 2, xnoiseArray(2, 1) - 3, 'START', 'Color', 'k', 'FontS
 text(xnoiseArray(1, end) - 0.5, xnoiseArray(2, end) - 3.5, 'STOP', 'Color', 'k', 'FontSize', 10);
 
 % Add legend and axis formatting
-legend('True State', 'Spoofed Measurement', 'AXKF Estimation', 'RBFNN Estimation', 'Location', 'northeast')
+legend('True State', 'Spoofed Measurement', 'RBFNN Estimation', 'AXKF Estimation', 'Location', 'northeast')
 grid on; grid minor
 axis([-57 57 -10 80])
 xlabel('x (m)')
