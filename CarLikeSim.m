@@ -1,7 +1,7 @@
 % IEEE Transactions on Industrial Cyber Physical System
 % CarLikeSim.m
 % Created by Muhammad Hilmi
-% Last Update: 18-10-2025
+% Last Update: 19-10-2025
 
 clear all;
 close all;
@@ -33,14 +33,11 @@ thetaArray = []; thetanloArray = []; thetahatArray = []; thetarbfArray = [];
 % Parameters for Estimation
 v = 0.01; e1 = 1; e2 = 100; p = -10; b = 0.01; n = e1/e2;
 a1 = v + e1*p + e2*b; a2 = (n*e2 - e1)/2; a3 = a2; a4 = -e2;
-J = 3*eye(7); Y = [0 0 0 0 0 1 0; 0 0 0 0 0 0 1]; Q = 0.01*eye(7);
+H = 3*eye(7); Y = [0 0 0 0 0 1 0; 0 0 0 0 0 0 1]; J = 0.01*eye(7);
 
-eivals = eig([-J + a1*eye(7), Aa'*J - Ca'*Y + a2*eye(7); J*Aa - Y'*Ca + a3*eye(7), J + a4*eye(7)]);
+eivals = eig([-H + a1*eye(7), Aa'*H - Ca'*Y + a2*eye(7); H*Aa - Y'*Ca + a3*eye(7), H + a4*eye(7)]);
 alpha = 0.95; lambda = 0.999; Pk = 0.01*eye(7); Qk = 0.01*eye(7); Rk = 10^8*eye(2);
-Kappa = zeros(7, 2); Sk = 0.01*eye(2);
-
-Pk2 = 0.01*eye(7); Qk2 = 0.01*eye(7); Rk2 = 10^8*eye(2);
-Kappa2 = zeros(7, 2); Sk2 = 0.01*eye(2);
+Upsilon = zeros(7, 2); Sk = 0.01*eye(2);
 
 x_prev = x; xnoise_prev = x + [zeros(5,1); -Af*zeros(2,1)];
 xnlo_prev = xnlo; thetahat_prev = thetahat;
@@ -87,10 +84,10 @@ for i = 1:length(a)
 
     % AXKF Estimation
     txkf = tic;
-    K = Aa - inv(J)*Y'*Ca;
-    P = 2*inv(Xa*Xa' + Q);
+    K = Aa - inv(H)*Y'*Ca;
+    P = 2*inv(Xa*Xa' + J);
     fxnlo = [xnlo(4)*cos(xnlo(3)); xnlo(4)*sin(xnlo(3)); xnlo(4)/l*tan(xnlo(5)); 0; 0; 0; 0];
-    xnlo = Aa*xnlo + fxnlo*dt + Ba*u*dt + Xa*thetanlo*dt + inv(J)*Y'*(ynoise - Ca*xnlo)*dt;
+    xnlo = Aa*xnlo + fxnlo*dt + Ba*u*dt + Xa*thetanlo*dt + inv(H)*Y'*(ynoise - Ca*xnlo)*dt;
     thetanlo = thetanlo + Xa'*P*((xnoise - xnlo) - K*(xnoise_prev - xnlo_prev) - (fx - fxnlo));
     Fxh = [zeros(5,5) zeros(5,2); zeros(2,7)];
     Fxh(1:5, 1:5) = [0 0 -xnlo(4)*sin(xnlo(3)) cos(xnlo(3)) 0;
@@ -102,14 +99,14 @@ for i = 1:length(a)
     Sigma = Ca*Pk*Ca' + Rk;
     Kk = Pk*Ca'*inv(Sigma);
     Pk = (eye(7) - Kk*Ca)*Pk;
-    Omega = Ca*(Fxh*dt)*Kappa + Ca*Xa*dt;
-    Kappa = (eye(7) - Kk*Ca)*(Fxh*dt)*Kappa + (eye(7) - Kk*Ca)*Xa*dt;
+    Omega = Ca*(Fxh*dt)*Upsilon + Ca*Xa*dt;
+    Upsilon = (eye(7) - Kk*Ca)*(Fxh*dt)*Upsilon + (eye(7) - Kk*Ca)*Xa*dt;
     Lambda = inv(lambda*Sigma + Omega*Sk*Omega');
     Gamma = Sk*Omega'*Lambda;
     Sk = Sk/lambda - Sk*Omega'*Lambda*Omega*Sk/lambda;
     ytilde = ynoise - Ca*xhat;
     thetahat = thetanlo + Gamma*ytilde;
-    xhat = Aa*xnlo + Fxh*xhat*dt + fxnlo*dt - Fxh*xnlo*dt + Ba*u*dt + Xa*thetahat_prev*dt + Kk*ytilde*dt + Kappa*(thetahat - thetahat_prev)*dt;
+    xhat = Aa*xnlo + Fxh*xhat*dt + fxnlo*dt - Fxh*xnlo*dt + Ba*u*dt + Xa*thetahat_prev*dt + Kk*ytilde*dt + Upsilon*(thetahat - thetahat_prev)*dt;
     delxkf(i) = toc(txkf);
 
     % Update Previous States
@@ -157,7 +154,7 @@ set(gca, 'FontSize', 14)
 hold off
 
 % Initialize Car-Like Model plot
-H = zeros(1,24);
+Q = zeros(1,24);
 n = length(xArray(1,:));
 fh = figure(2);
 fh.Position = [0 50 1000 800];
@@ -170,9 +167,9 @@ plot(xrbfArray(1, :), xrbfArray(2, :), '--', 'Color', "#EDB120", 'LineWidth', 3)
 plot(xhatArray(1, :), xhatArray(2, :), '--', 'Color', "#77AC30", 'LineWidth', 3)
 
 % Add car-like model markers at start, middle, and end
-H = CarLikeModel(xArray(1, 1), xArray(2, 1), xArray(3, 1), xArray(5, 1));
-H = CarLikeModel(xArray(1, ceil(n/2)), xArray(2, ceil(n/2)), xArray(3, ceil(n/2)), xArray(5, ceil(n/2)));
-H = CarLikeModel(xArray(1, n), xArray(2, n), xArray(3, n), xArray(5, n));
+Q = CarLikeModel(xArray(1, 1), xArray(2, 1), xArray(3, 1), xArray(5, 1));
+Q = CarLikeModel(xArray(1, ceil(n/2)), xArray(2, ceil(n/2)), xArray(3, ceil(n/2)), xArray(5, ceil(n/2)));
+Q = CarLikeModel(xArray(1, n), xArray(2, n), xArray(3, n), xArray(5, n));
 
 % Add start and stop text annotations
 text(xnoiseArray(1, 1) - 2, xnoiseArray(2, 1) - 3, 'START', 'Color', 'k', 'FontSize', 10); 
