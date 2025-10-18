@@ -1,7 +1,7 @@
 % IEEE Transactions on Industrial Cyber Physical System
 % CarLikeSim.m
 % Created by Muhammad Hilmi
-% Last Update: 06-09-2024
+% Last Update: 18-10-2025
 
 clear all;
 close all;
@@ -38,6 +38,9 @@ J = 3*eye(7); Y = [0 0 0 0 0 1 0; 0 0 0 0 0 0 1]; Q = 0.01*eye(7);
 eivals = eig([-J + a1*eye(7), Aa'*J - Ca'*Y + a2*eye(7); J*Aa - Y'*Ca + a3*eye(7), J + a4*eye(7)]);
 alpha = 0.95; lambda = 0.999; Pk = 0.01*eye(7); Qk = 0.01*eye(7); Rk = 10^8*eye(2);
 Kappa = zeros(7, 2); Sk = 0.01*eye(2);
+
+Pk2 = 0.01*eye(7); Qk2 = 0.01*eye(7); Rk2 = 10^8*eye(2);
+Kappa2 = zeros(7, 2); Sk2 = 0.01*eye(2);
 
 x_prev = x; xnoise_prev = x + [zeros(5,1); -Af*zeros(2,1)];
 xnlo_prev = xnlo; thetahat_prev = thetahat;
@@ -113,13 +116,8 @@ for i = 1:length(a)
     x_prev = x; xnoise_prev = xnoise; xnlo_prev = xnlo; thetahat_prev = thetahat;
 
     % Error Calculations
-    e_x_hat(i,1) = (xnoise(1) - xhat(1))^2;
-    e_y_hat(i,1) = (xnoise(2) - xhat(2))^2;
-    e_t_hat(i) = (xnoise(3) - xhat(3))^2;
-    e_v_hat(i) = (xnoise(4) - xhat(4))^2;
-    e_d_hat(i) = (xnoise(5) - xhat(5))^2;
-    e_x_hat(i,2) = (theta(1) - thetahat(1))^2;
-    e_y_hat(i,2) = (theta(2) - thetahat(2))^2;
+    exhat(:,i) = xnoise - xhat; 
+    exrbf(:,i) = xnoise - xrbf;
 end
 
 % Define time vector for plotting
