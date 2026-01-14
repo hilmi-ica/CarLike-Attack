@@ -6,7 +6,7 @@ This repository contains a numerical simulation for path-following of a car-like
 
 M. Hilmi, I. A. Kuncara, A. Widyotriatmo and A. Hasan, "Sensor Attack Detection and Size Estimation in Cyber-Physical Mobile Systems," in IEEE Transactions on Industrial Cyber-Physical Systems, vol. 4, pp. 34-43, 2026.
 ```
-@ARTICLE{11288016,
+@ARTICLE{CarLike-Attack,
   author={Hilmi, Muhammad and Kuncara, Ivan Adi and Widyotriatmo, Augie and Hasan, Agus},
   journal={IEEE Transactions on Industrial Cyber-Physical Systems}, 
   title={Sensor Attack Detection and Size Estimation in Cyber-Physical Mobile Systems}, 
