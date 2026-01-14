@@ -14,5 +14,6 @@ M. Hilmi, I. A. Kuncara, A. Widyotriatmo and A. Hasan, "Sensor Attack Detection 
   volume={4},
   number={},
   pages={34-43},
-  doi={10.1109/TICPS.2025.3641919}}
+  doi={10.1109/TICPS.2025.3641919}
+}
 ```
